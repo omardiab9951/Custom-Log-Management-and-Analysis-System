@@ -13,7 +13,7 @@ fi
 while read line; do
     [ -z "$line" ] && continue
 
-    DATE=$(echo "$line" | awk '{print $1 $2}')
+    DATE=$(echo "$line" | awk '{print $1, $2}')
     TIME=$(echo "$line" | awk '{print $3}')
 
     if echo "$line" | grep -q "Failed"; then
