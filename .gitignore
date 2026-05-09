@@ -1,0 +1,7 @@
+logs_db.sqlite
+data/raw/*
+data/sorted/*
+reports/
+scripts/.last_size
+*.pyc
+__pycache__/
