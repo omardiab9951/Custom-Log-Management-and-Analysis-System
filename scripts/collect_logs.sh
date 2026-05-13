@@ -6,8 +6,8 @@
 SOURCE_LOG="/var/log/secure"
 [ ! -f "$SOURCE_LOG" ] && SOURCE_LOG="/var/log/auth.log"
 
-OUTPUT="../data/raw/auth.log"
-mkdir -p ../data/raw
+OUTPUT="data/raw/auth.log"
+mkdir -p data/raw
 
 if [ ! -f "$SOURCE_LOG" ]; then
     echo "❌ Error: No auth log found at $SOURCE_LOG"
