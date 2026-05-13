@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-INPUT="data/raw/auth.log"
-OUTPUT="data/sorted/sorted.log"
+source "$(dirname "$0")/config.sh"
+INPUT="$RAW_LOG"
+OUTPUT="$SORTED_LOG"
 
 # Create output directory if it doesn't exist
 mkdir -p "$(dirname "$OUTPUT")"

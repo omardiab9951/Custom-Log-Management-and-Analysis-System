@@ -15,8 +15,20 @@ DB_FILE="$PROJECT_DIR/logs_db.sqlite"
 REPORTS_DIR="$PROJECT_DIR/reports"
 
 # System paths
-SYSTEM_LOG="/var/log/secure"
-[ ! -f "$SYSTEM_LOG" ] && SYSTEM_LOG="/var/log/auth.log"
+# System paths — auto-detect across distros (Kali, Ubuntu, RHEL, Arch)
+SYSTEM_LOG=""
+for _candidate in "/var/log/secure" "/var/log/auth.log" \
+                  "/var/log/audit/audit.log" "/var/log/syslog" \
+                  "/var/log/messages"; do
+    if [ -f "$_candidate" ] && [ -r "$_candidate" ]; then
+        SYSTEM_LOG="$_candidate"
+        break
+    fi
+done
+# Kali Linux default: journald (no flat auth.log without rsyslog)
+if [ -z "$SYSTEM_LOG" ] && command -v journalctl &>/dev/null; then
+    SYSTEM_LOG="journald"
+fi
 
 # Thresholds
 ALARM_THRESHOLD=3

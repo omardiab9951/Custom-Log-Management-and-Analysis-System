@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # scripts/generate_report.sh - DS Student A (Week 3)
-DB="logs_db.sqlite"
-REPORT_DIR="reports"
+source "$(dirname "$0")/config.sh"
+DB="$DB_FILE"
+REPORT_DIR="$REPORTS_DIR"
 REPORT_FILE="$REPORT_DIR/daily_report.txt"
 
 mkdir -p "$REPORT_DIR"

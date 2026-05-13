@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # scripts/alarm.sh - Cyber Student (Week 2)
 # Reads sorted.log (CSV) and triggers ALARM if Failed attempts > 3
+source "$(dirname "$0")/config.sh"
 
-SORTED_FILE="data/sorted/sorted.log"
+SORTED_FILE="$SORTED_LOG"
 
 if [ ! -f "$SORTED_FILE" ]; then
     echo "❌ Error: $SORTED_FILE not found. Run parser.sh first."
@@ -18,7 +19,7 @@ echo "================================="
 echo " Found: $COUNT Failed login attempts"
 echo ""
 
-if [ "$COUNT" -gt 3 ]; then
+if [ "$COUNT" -gt "$ALARM_THRESHOLD" ]; then
     echo "🚨 !!!!!!!!!!!!!!!!!!!!!!!!"
     echo "🚨 !!     ALARM!!!      !!"
     echo "🚨 !! $COUNT Failed Logins !!"

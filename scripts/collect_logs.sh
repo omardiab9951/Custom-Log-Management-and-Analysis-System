@@ -2,20 +2,42 @@
 # scripts/collect_logs.sh - Cyber Student (Week 1)
 # Copies fresh auth logs to data/raw/auth.log
 
-# RHEL uses /var/log/secure for auth logs, but we'll check both
-SOURCE_LOG="/var/log/secure"
-[ ! -f "$SOURCE_LOG" ] && SOURCE_LOG="/var/log/auth.log"
+source "$(dirname "$0")/config.sh"
+OUTPUT="$RAW_LOG"
 
-OUTPUT="data/raw/auth.log"
-mkdir -p data/raw
 
-if [ ! -f "$SOURCE_LOG" ]; then
-    echo "❌ Error: No auth log found at $SOURCE_LOG"
+# Auto-detect auth log: try flat files first, then journald (Kali default)
+SOURCE_LOG=""
+for _candidate in "/var/log/secure" "/var/log/auth.log" \
+                  "/var/log/audit/audit.log" "/var/log/syslog" \
+                  "/var/log/messages"; do
+    if [ -f "$_candidate" ] && [ -r "$_candidate" ]; then
+        SOURCE_LOG="$_candidate"
+        break
+    fi
+done
+
+if [ -n "$SOURCE_LOG" ]; then
+    echo "📥 Collecting logs from $SOURCE_LOG..."
+    tail -n 100 "$SOURCE_LOG" > "$OUTPUT"
+elif command -v journalctl &>/dev/null; then
+    echo "📥 No flat auth log found. Collecting from systemd journal (Kali default)..."
+    journalctl -n 100 --no-pager --output=short-traditional \
+        -u ssh -u sshd \
+        --merge 2>/dev/null > "$OUTPUT"
+    # If SSH unit had no entries, fall back to full journal tail
+    if [ ! -s "$OUTPUT" ]; then
+        journalctl -n 100 --no-pager --output=short-traditional 2>/dev/null > "$OUTPUT"
+    fi
+    SOURCE_LOG="journald"
+else
+    echo "❌ Error: No auth log source found."
+    echo "   Checked: /var/log/secure, /var/log/auth.log, /var/log/syslog, journald"
+    echo "   Fix:     apt-get install -y rsyslog && systemctl enable --now rsyslog"
     exit 1
 fi
 
-echo "📥 Collecting logs from $SOURCE_LOG..."
-tail -n 100 "$SOURCE_LOG" > "$OUTPUT"
+
 
 # Check if collected logs have any useful SSH entries
 USEFUL=$(grep -cE "Failed|Accepted" "$OUTPUT" 2>/dev/null)

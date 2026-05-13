@@ -3,7 +3,7 @@
 # Monitors log file size changes
 
 LOG_FILE="data/raw/auth.log"
-SIZE_FILE="scripts/.last_size"
+SIZE_FILE="$(dirname "$0")/.last_size"
 
 if [ ! -f "$LOG_FILE" ]; then
     echo "❌ Error: $LOG_FILE not found. Run collect_logs.sh first."
