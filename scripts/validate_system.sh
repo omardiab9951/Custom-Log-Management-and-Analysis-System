@@ -40,7 +40,7 @@ fi
 # Check 3: Handle empty log file
 echo -n "Testing edge case: Empty log... "
 mkdir -p "$DATA_DIR/raw"
-echo "" > "$RAW_LOG"
+sudo bash -c "echo '' > '$RAW_LOG'"
 if bash "$PROJECT_DIR/scripts/parser.sh" > /dev/null 2>&1; then
     echo -e "${GREEN}✅ Handles empty logs${NC}"
 else
