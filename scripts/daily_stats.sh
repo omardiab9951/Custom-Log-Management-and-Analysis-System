@@ -14,13 +14,23 @@ echo " 📊 DAILY LOG STATISTICS (Text Chart)"
 echo "====================================="
 echo ""
 
-# Query dates and counts, then format into a simple ASCII bar chart
-sqlite3 "$DB" "SELECT log_date, COUNT(*) as count FROM log_entries GROUP BY log_date ORDER BY log_date;" | \
-awk -F'|' '{
-    bar = ""
-    for(i=1; i<=$2; i++) bar = bar "#"
-    printf "%-10s | %-20s (%d logs)\n", $1, bar, $2
-}'
+# Get max count for scaling
+MAX=$(sqlite3 "$DB" "SELECT MAX(count) FROM (SELECT COUNT(*) as count FROM log_entries GROUP BY log_date);")
+MAX=${MAX:-1}
+
+# Print scaled bar chart with colors per status
+sqlite3 "$DB" "SELECT log_date, status, COUNT(*) as count FROM log_entries GROUP BY log_date, status ORDER BY log_date;" | \
+while IFS='|' read -r DATE STATUS COUNT; do
+    BAR_LEN=$(( COUNT * 30 / MAX ))
+    BAR=$(printf '#%.0s' $(seq 1 $BAR_LEN))
+    if [ "$STATUS" = "Failed" ]; then
+        printf "%-12s %-10s | \033[0;31m%-30s\033[0m (%d)\n" "$DATE" "$STATUS" "$BAR" "$COUNT"
+    else
+        printf "%-12s %-10s | \033[0;32m%-30s\033[0m (%d)\n" "$DATE" "$STATUS" "$BAR" "$COUNT"
+    fi
+done
 
 echo ""
-echo "✅ Chart generation complete. (Adapted to pure Bash for Linux/Shell course)"
+echo " Legend: $(printf '\033[0;31m#\033[0m') Failed   $(printf '\033[0;32m#\033[0m') Accepted"
+echo "====================================="
+echo "✅ Chart generation complete."
