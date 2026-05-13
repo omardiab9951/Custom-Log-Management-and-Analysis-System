@@ -18,7 +18,8 @@ echo "📥 Collecting logs from $SOURCE_LOG..."
 tail -n 100 "$SOURCE_LOG" > "$OUTPUT"
 
 # Check if collected logs have any useful SSH entries
-USEFUL=$(grep -c -E "Failed|Accepted" "$OUTPUT" 2>/dev/null || echo 0)
+USEFUL=$(grep -cE "Failed|Accepted" "$OUTPUT" 2>/dev/null)
+USEFUL=${USEFUL:-0}
 
 if [ "$USEFUL" -eq 0 ]; then
     echo "⚠️  No SSH login events found in real log. Generating test data..."
