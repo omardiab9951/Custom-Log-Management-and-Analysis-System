@@ -1,12 +1,26 @@
 #!/usr/bin/env bash
-#===============================================================================
-# SCRIPT NAME: main_menu.sh
-# DESCRIPTION: User-friendly menu interface for the log analysis system
-# AUTHOR: Omar Diab
-# VERSION: 1.0
-#===============================================================================
 
 source "$(dirname "$0")/config.sh"
+
+# Access Control - restrict to authorized users
+AUTHORIZED_USERS=("omar" "muaaz" "root")
+CURRENT_USER=$(whoami)
+
+IS_AUTHORIZED=0
+for USER in "${AUTHORIZED_USERS[@]}"; do
+    if [ "$CURRENT_USER" = "$USER" ]; then
+        IS_AUTHORIZED=1
+        break
+    fi
+done
+
+if [ "$IS_AUTHORIZED" -eq 0 ]; then
+    echo -e "${RED}❌ Access Denied: $CURRENT_USER is not authorized to run this system.${NC}"
+    exit 1
+fi
+
+echo -e "${GREEN}✅ Access granted: Welcome, $CURRENT_USER${NC}"
+sleep 1
 
 while true; do
     clear
@@ -36,7 +50,7 @@ while true; do
     echo ""
     echo -n "Enter choice [0-12]: "
     read choice
-    
+
     case $choice in
         1)
             echo -e "${BLUE}Collecting logs...${NC}"
@@ -98,7 +112,7 @@ while true; do
             sleep 2
             ;;
     esac
-    
+
     echo ""
     echo -n "Press Enter to continue..."
     read
