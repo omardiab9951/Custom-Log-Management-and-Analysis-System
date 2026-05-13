@@ -30,10 +30,8 @@ fi
 
 echo "🔄 Parsing logs..."
 
-while IFS= read -r line || [ -n "$line" ]; do
-
-    # Skip empty lines or lines that don't start with a valid log date
-    [[ -z "$line" || ! "$line" =~ [A-Z][a-z]{2}\ [0-9] ]] && continue
+while read -r line; do
+    echo "$line" | grep -qiE "Failed|Accepted" || continue
 
     # Extract date, time fields
     DATE=$(echo "$line" | awk '{print $1, $2}')
