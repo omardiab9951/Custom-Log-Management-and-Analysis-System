@@ -1,11 +1,4 @@
 #!/usr/bin/env bash
-#===============================================================================
-# SCRIPT NAME: parser.sh
-# DESCRIPTION: Parses raw auth.log and extracts login events into CSV format
-# AUTHOR: Omar Nasr
-# VERSION: 1.1
-#===============================================================================
-
 INPUT="data/raw/auth.log"
 OUTPUT="data/sorted/sorted.log"
 
@@ -19,6 +12,19 @@ mkdir -p "$(dirname "$OUTPUT")"
 if [ ! -s "$INPUT" ]; then
     echo "⚠️  Warning: $INPUT is empty. Skipping."
     exit 0
+fi
+
+# Generate and verify checksum for data integrity
+CHECKSUM_FILE="data/raw/auth.log.md5"
+
+echo "🔒 Checking data integrity..."
+md5sum "$INPUT" > "$CHECKSUM_FILE"
+
+if md5sum -c "$CHECKSUM_FILE" > /dev/null 2>&1; then
+    echo "✅ Integrity check passed: $INPUT"
+else
+    echo "❌ WARNING: Log file may have been tampered with!"
+    exit 1
 fi
 
 echo "🔄 Parsing logs..."
