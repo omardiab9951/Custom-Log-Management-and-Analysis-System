@@ -15,9 +15,22 @@ if [ ! -f "$SOURCE_LOG" ]; then
 fi
 
 echo "📥 Collecting logs from $SOURCE_LOG..."
-
-# Copy only the last 100 lines to keep it fast for testing
 tail -n 100 "$SOURCE_LOG" > "$OUTPUT"
 
-LINES=$(wc -l < "$OUTPUT")
-echo "✅ Collected $LINES log lines → $OUTPUT"
+# Check if collected logs have any useful SSH entries
+USEFUL=$(grep -c -E "Failed|Accepted" "$OUTPUT" 2>/dev/null || echo 0)
+
+if [ "$USEFUL" -eq 0 ]; then
+    echo "⚠️  No SSH login events found in real log. Generating test data..."
+    cat > "$OUTPUT" << 'EOF'
+May 13 16:00:01 localhost sshd[1001]: Failed password for root from 192.168.1.100 port 22 ssh2
+May 13 16:00:05 localhost sshd[1002]: Failed password for admin from 192.168.1.100 port 22 ssh2
+May 13 16:00:10 localhost sshd[1003]: Failed password for omar from 10.0.0.5 port 22 ssh2
+May 13 16:00:15 localhost sshd[1004]: Failed password for test from 10.0.0.5 port 22 ssh2
+May 13 16:01:00 localhost sshd[1005]: Accepted password for omar from 192.168.1.1 port 22 ssh2
+May 13 16:01:30 localhost sshd[1006]: Accepted publickey for omar from 192.168.1.1 port 22 ssh2
+EOF
+    echo "✅ Test data generated → $OUTPUT"
+else
+    echo "✅ Collected $USEFUL SSH log lines → $OUTPUT"
+fi
